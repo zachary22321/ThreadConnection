@@ -43,7 +43,7 @@ class Program
 
         foreach (Rgba32 c in colors)
         {
-            Image<Rgba32> newImage = new Image<Rgba32>(width, height, new Rgba32(0, 0, 0, 255));
+            Image<Rgba32> newImage = new Image<Rgba32>(width, height, new Rgba32(0, 0, 0, 0));
 
             // Set original positions of the color
             for (int y = 0; y < height; y++)
@@ -101,9 +101,9 @@ class Program
                 }
             }
 
-            // Save the new BMP
-            string outFile = Path.Combine(dir, $"{baseName}_{c.R}_{c.G}_{c.B}.bmp");
-            newImage.SaveAsBmp(outFile);
+            // Save the new PNG
+            string outFile = Path.Combine(dir, $"{baseName}_{c.R}_{c.G}_{c.B}.png");
+            newImage.SaveAsPng(outFile);
         }
 
         image.Dispose();

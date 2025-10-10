@@ -19,3 +19,4 @@
 /Users/zacharypozzi/Development/deleteme/ThreadConnections/ThreadConnections/obj/Debug/net9.0/ThreadConnections.genruntimeconfig.cache
 /Users/zacharypozzi/Development/deleteme/ThreadConnections/ThreadConnections/obj/Debug/net9.0/ref/ThreadConnections.dll
 /Users/zacharypozzi/Development/deleteme/ThreadConnections/ThreadConnections/bin/Debug/net9.0/SixLabors.ImageSharp.dll
+/Users/zacharypozzi/Development/deleteme/ThreadConnections/ThreadConnections/obj/Debug/net9.0/ThreadConnections.sourcelink.json
