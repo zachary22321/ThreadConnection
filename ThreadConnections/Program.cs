@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.IO;
 using SixLabors.ImageSharp;
 using SixLabors.ImageSharp.PixelFormats;
+using SixLabors.ImageSharp.Processing;
 
 class Program
 {
@@ -110,42 +111,57 @@ class Program
             newImage.Dispose();
         }
 
-        image.Dispose();
-
         // Now find and delete the PNG with the least transparent pixels
-        if (outFiles.Count > 0)
-        {
-            string toDelete = null;
-            int minTransparent = int.MaxValue;
+        string toDelete = null;
+        int minTransparent = int.MaxValue;
 
-            foreach (var file in outFiles)
+        foreach (var file in outFiles)
+        {
+            using (var img = Image.Load<Rgba32>(file))
             {
-                using (var img = Image.Load<Rgba32>(file))
+                int trans = 0;
+                for (int y = 0; y < img.Height; y++)
                 {
-                    int trans = 0;
-                    for (int y = 0; y < img.Height; y++)
+                    for (int x = 0; x < img.Width; x++)
                     {
-                        for (int x = 0; x < img.Width; x++)
+                        if (img[x, y].A == 0)
                         {
-                            if (img[x, y].A == 0)
-                            {
-                                trans++;
-                            }
+                            trans++;
                         }
                     }
-                    if (trans < minTransparent)
-                    {
-                        minTransparent = trans;
-                        toDelete = file;
-                    }
+                }
+                if (trans < minTransparent)
+                {
+                    minTransparent = trans;
+                    toDelete = file;
+                }
+            }
+        }
+
+        if (toDelete != null)
+        {
+            File.Delete(toDelete);
+        }
+
+        // Stack the remaining images on top of the original BMP
+        using (var finalImage = image.Clone())
+        {
+            foreach (var file in outFiles)
+            {
+                if (file == toDelete) continue;
+
+                using (var layer = Image.Load<Rgba32>(file))
+                {
+                    finalImage.Mutate(x => x.DrawImage(layer, new Point(0, 0), 1f));
                 }
             }
 
-            if (toDelete != null)
-            {
-                File.Delete(toDelete);
-            }
+            // Save the combined PNG
+            string combinedFile = Path.Combine(dir, $"{baseName}_combined.png");
+            finalImage.SaveAsPng(combinedFile);
         }
+
+        image.Dispose();
 
         Console.WriteLine("Processing complete.");
     }
