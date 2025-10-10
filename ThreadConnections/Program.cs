@@ -41,6 +41,8 @@ class Program
         string baseName = Path.GetFileNameWithoutExtension(inputFile);
         string dir = Path.GetDirectoryName(inputFile);
 
+        List<string> outFiles = new List<string>();
+
         foreach (Rgba32 c in colors)
         {
             Image<Rgba32> newImage = new Image<Rgba32>(width, height, new Rgba32(0, 0, 0, 0));
@@ -104,9 +106,47 @@ class Program
             // Save the new PNG
             string outFile = Path.Combine(dir, $"{baseName}_{c.R}_{c.G}_{c.B}.png");
             newImage.SaveAsPng(outFile);
+            outFiles.Add(outFile);
+            newImage.Dispose();
         }
 
         image.Dispose();
+
+        // Now find and delete the PNG with the least transparent pixels
+        if (outFiles.Count > 0)
+        {
+            string toDelete = null;
+            int minTransparent = int.MaxValue;
+
+            foreach (var file in outFiles)
+            {
+                using (var img = Image.Load<Rgba32>(file))
+                {
+                    int trans = 0;
+                    for (int y = 0; y < img.Height; y++)
+                    {
+                        for (int x = 0; x < img.Width; x++)
+                        {
+                            if (img[x, y].A == 0)
+                            {
+                                trans++;
+                            }
+                        }
+                    }
+                    if (trans < minTransparent)
+                    {
+                        minTransparent = trans;
+                        toDelete = file;
+                    }
+                }
+            }
+
+            if (toDelete != null)
+            {
+                File.Delete(toDelete);
+            }
+        }
+
         Console.WriteLine("Processing complete.");
     }
 }
